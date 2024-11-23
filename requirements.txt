@@ -1,0 +1,30 @@
+Library Versions for BackgroundCameraRecorder
+
+opencv-python
+Version: >=4.5.3
+Installation: pip install opencv-python
+pyautogui
+Version: >=0.9.53
+Installation: pip install pyautogui (automatically installed with opencv-python)
+numpy
+Version: >=1.20.0
+Installation: pip install numpy (automatically installed with opencv-python)
+setuptools
+Version: >=57.0.0
+Installation: pip install setuptools (automatically installed with opencv-python)
+wheel
+Version: >=0.37.0
+Installation: pip install wheel (automatically installed with opencv-python)
+ctypes
+Version: (part of Python Standard Library)
+No separate installation required
+atexit
+Version: (part of Python Standard Library)
+No separate installation required
+Python Version:
+
+python
+Version: >=3.8
+To install all required libraries (excluding Standard Library modules), run:
+
+pip install opencv-python pyautogui numpy setuptools wheel
