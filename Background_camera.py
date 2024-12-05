@@ -7,15 +7,22 @@ import time
 import pyautogui
 
 class BackgroundCameraRecorder:
-    def __init__(self, camera_index=0, output_filename='output.mp4'):
+    def __init__(self, camera_index=0, output_filename='output.mp4', 
+                 fps=30.0, frame_width=None, frame_height=None):
         """
         Initializes the background camera recorder for Windows.
 
         :param camera_index: Index of the camera to use (default=0, usually the integrated camera)
         :param output_filename: Filename for the recorded video
+        :param fps: Desired frames per second (default=30.0)
+        :param frame_width: Optional, specify a custom frame width (default=None, uses camera's default)
+        :param frame_height: Optional, specify a custom frame height (default=None, uses camera's default)
         """
         self.camera_index = camera_index
         self.output_filename = output_filename
+        self.fps = fps
+        self.frame_width = frame_width
+        self.frame_height = frame_height
         self.is_recording = False
         self.cap = None
         self.out = None
@@ -67,18 +74,20 @@ class BackgroundCameraRecorder:
             self.is_recording = False
             return
         
-        # Set the frame rate (FPS) for the video
-        fps = 30.0
+        # Set custom frame dimensions if provided
+        if self.frame_width and self.frame_height:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
         
-        # Get the width and height of the frames
-        frame_width = int(self.cap.get(3))
-        frame_height = int(self.cap.get(4))
+        # Get the actual frame dimensions
+        frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
         # Define the codec and create a VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # codec
-        self.out = cv2.VideoWriter(self.output_filename, fourcc, fps, (frame_width, frame_height))
+        self.out = cv2.VideoWriter(self.output_filename, fourcc, self.fps, (frame_width, frame_height))
         
-        print("Recording to", self.output_filename)
+        print(f"Recording to {self.output_filename} at {self.fps} FPS ({frame_width}x{frame_height})")
         
         while self.is_recording and self.cap.isOpened():
             ret, frame = self.cap.read()
@@ -86,13 +95,19 @@ class BackgroundCameraRecorder:
                 print("Cannot receive frame")
                 break
             
+            # **Improved Frame Handling**
+            # Apply a simple frame processing technique to reduce CPU usage
+            # (e.g., resize, convert to grayscale, or apply a blur)
+            # For demonstration, let's resize the frame to 50% of its original size
+            # frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+            
             # Write the frame to the output video
             self.out.write(frame)
         
         # Release everything when done or stopped
         self.cap.release()
         self.out.release()
-        print("Recording saved to", self.output_filename)
+        print(f"Recording saved to {self.output_filename}")
 
     def shutdown_hook(self):
         """
@@ -103,7 +118,10 @@ class BackgroundCameraRecorder:
 
 # Example usage
 if __name__ == "__main__":
-    recorder = BackgroundCameraRecorder(0, 'windows_background_record.mp4')
+    recorder = BackgroundCameraRecorder(0, 'windows_background_record.mp4', 
+                                        fps=60.0, 
+                                        frame_width=1280, 
+                                        frame_height=720)
     recorder.start_recording()
     # Simulate other work
     time.sleep(120)  # Wait for 2 minutes before exiting
